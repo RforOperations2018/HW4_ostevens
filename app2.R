@@ -12,10 +12,18 @@ library(DT)
 pdf(NULL)
 
 
+GET("https://query.data.world/s/owq2xiknasfbqxec6r6vixndfsinnn", write_disk(tf <- tempfile(fileext = ".xlsx")))
+df <- read_excel(tf)
+names(df) <- str_replace(names(df), "\\(","") %>%
+             str_replace( "\\)","") %>%
+             str_replace_all( " ","_") %>%
+             str_replace( ",","") %>%
+             str_to_lower() 
 
+origdata <- df
+  
 
-
-origdata <- read_csv("data_behind_table_2_1_whr_2017.csv")
+# origdata <- read_csv("data_behind_table_2_1_whr_2017.csv")
 money.wide <- read_excel("Download-GDPPCconstant-USD-countries.xls", 
                          skip = 2)
 money.long <- melt(money.wide, id.vars = c("CountryID","Country"))
