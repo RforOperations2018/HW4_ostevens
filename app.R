@@ -75,8 +75,9 @@ server <- function(input, output) {
   output$count <- renderPlotly({
     # data for chart
     table <- loadjail %>%
-      group_by(Date) %>%
-      summarise(count = n())
+      # group_by(Date) %>%
+      # summarise(count = n())
+      group_by_(Date) %>% count()
 
     ggplot(table, aes(x = date, y = count)) + geom_bar()
   })
