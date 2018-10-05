@@ -66,6 +66,7 @@ server <- function(input, output) {
     
     # Load and clean data
     jail <- ckanSQL(url) %>%
+      na.omit() %>%
       mutate(date = as.Date(Date))
       return(jail)
   })
@@ -73,8 +74,8 @@ server <- function(input, output) {
   #plot # inmates counted in census
   output$count <- renderPlotly({
     # data for chart
-    table <- jail %>%
-      group_by(date) %>%
+    table <- loadjail %>%
+      group_by(Date) %>%
       summarise(count = n())
 
     ggplot(table, aes(x = date, y = count)) + geom_bar()
