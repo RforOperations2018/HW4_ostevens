@@ -8,17 +8,36 @@ library(countrycode)
 library(readr)
 library(readxl)
 library(DT)
+library(httr)
 
 pdf(NULL)
 
 
 GET("https://query.data.world/s/owq2xiknasfbqxec6r6vixndfsinnn", write_disk(tf <- tempfile(fileext = ".xlsx")))
 df <- read_excel(tf)
+
+
+query_results <- GET("https://api.data.world/v0/queries/3da01c6c-85b6-4668-9afb-26c8103c2cb7/results")
+
+# # r <- GET("https://api.data.world/v0/datasets/ostevens/shiny-project-happiness", authenticate("Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJwcm9kLXVzZXItY2xpZW50Om9zdGV2ZW5zIiwiaXNzIjoiYWdlbnQ6b3N0ZXZlbnM6OjE4OWI5ZDQ4LWJlYzEtNGY2Ni05OWI5LWM0YTVhM2I2ZTRjOCIsImlhdCI6MTUzNjc2MzQ2NSwicm9sZSI6WyJ1c2VyX2FwaV9yZWFkIiwidXNlcl9hcGlfd3JpdGUiXSwiZ2VuZXJhbC1wdXJwb3NlIjp0cnVlfQ.jDYD5jz1ln7_yFQSh2qkunbzms4uexj4COGohTKXkUW84usm92vz_YlEzcA6SBQ_Fe_QYH7sOj2LWyWYjK8i4w"))
+# 
+# r <- GET("https://api.data.world/v0/queries/3da01c6c-85b6-4668-9afb-26c8103c2cb7", authenticate("ostevens", "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJwcm9kLXVzZXItY2xpZW50Om9zdGV2ZW5zIiwiaXNzIjoiYWdlbnQ6b3N0ZXZlbnM6OjE4OWI5ZDQ4LWJlYzEtNGY2Ni05OWI5LWM0YTVhM2I2ZTRjOCIsImlhdCI6MTUzNjc2MzQ2NSwicm9sZSI6WyJ1c2VyX2FwaV9yZWFkIiwidXNlcl9hcGlfd3JpdGUiXSwiZ2VuZXJhbC1wdXJwb3NlIjp0cnVlfQ.jDYD5jz1ln7_yFQSh2qkunbzms4uexj4COGohTKXkUW84usm92vz_YlEzcA6SBQ_Fe_QYH7sOj2LWyWYjK8i4w"))
+# 
+# r <- GET("https://api.data.world/v0/queries/3da01c6c-85b6-4668-9afb-26c8103c2cb7")
+# 
+# # alternative GET command
+# # GET("https://query.data.world/s/b6eyyji2thr3m2hdkmnvhywwwr72lp", write_disk(tf <- tempfile(fileext = ".xlsx")))
+
+
+
+
 names(df) <- str_replace(names(df), "\\(","") %>%
              str_replace( "\\)","") %>%
              str_replace_all( " ","_") %>%
              str_replace( ",","") %>%
              str_to_lower() 
+
+GET("https://query.data.world/s/owq2xiknasfbqxec6r6vixndfsinnn")
 
 origdata <- df
   
