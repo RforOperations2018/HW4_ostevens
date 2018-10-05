@@ -8,43 +8,79 @@
 #
 
 library(shiny)
+library(httr)
+library(jsonlite)
+library(plotly)
+library(htmltools)
+library(tidyverse)
+library(lubridate)
 
-# Define UI for application that draws a histogram
+ckanSQL <- function(url) {
+  # Make the Request
+  r <- RETRY("GET", URLencode(url))
+  # Extract Content
+  c <- content(r, "text")
+  # Basic gsub to make NA's consistent with R
+  json <- gsub('NaN', 'NA', c, perl = TRUE)
+  # Create Dataframe
+  data.frame(jsonlite::fromJSON(json)$result$records)
+}
+
+
+
+# df <- read_csv("66cdcd57-6c92-4aaa-8800-0ed9d8f03e22.csv") %>%
+#   mutate(Month = month(mdy(Date)), Day = day(mdy(Date)), Year = year(mdy(Date)))
+# 
+# group_by(df, Year, Month, Day) %>%
+#   count()
+# group_by(df, Year, Month) %>%
+#   summarise(avg_age = mean(get('Current Age')))
+
+
+# Define UI for application
 ui <- fluidPage(
-   
-   # Application title
-   titlePanel("Old Faithful Geyser Data"),
-   
-   # Sidebar with a slider input for number of bins 
-   sidebarLayout(
-      sidebarPanel(
-         sliderInput("bins",
-                     "Number of bins:",
-                     min = 1,
-                     max = 50,
-                     value = 30)
-      ),
-      
-      # Show a plot of the generated distribution
-      mainPanel(
-         plotOutput("distPlot")
-      )
-   )
-)
+  
+  # Application title
+  titlePanel("Counts of 311 Jail Census"),
+  
+  # Sidebar
+  sidebarLayout(
+    sidebarPanel(
+      dateRangeInput("dates",
+                     "Select Dates",
+                     start = Sys.Date()-30,
+                     end = Sys.Date(),)),
+    mainPanel(
+      plotlyOutput("count")
+    )))
+
 
 # Define server logic required to draw a histogram
 server <- function(input, output) {
-   
-   output$distPlot <- renderPlot({
-      # generate bins based on input$bins from ui.R
-      x    <- faithful[, 2] 
-      bins <- seq(min(x), max(x), length.out = input$bins + 1)
-      
-      # draw the histogram with the specified number of bins
-      hist(x, breaks = bins, col = 'darkgray', border = 'white')
-   })
+  loadjail <- reactive({
+    # Build API Query with proper encodes
+    
+    input$dates[1] <- as.Date(input$dates[1], origin = "1970-01-01")
+    input$dates[2] <- as.Date(input$dates[2], origin = "1970-01-01")
+    url <- paste0("SELECT%20*%20FROM%20%2266cdcd57-6c92-4aaa-8800-0ed9d8f03e22%22%20WHERE%20%20%27Date%27%20%3E%3D%20%27", input$dates[1], "%27%20AND%20%27Date%27%20%3C%3D%20%27", input$dates[2], "%27")
+    
+    # Load and clean data
+    jail <- ckanSQL(url) %>%
+      mutate(date = as.Date(Date))
+      return(jail)
+  })
+  
+  #plot # inmates counted in census
+  output$count <- renderPlotly({
+    # data for chart
+    table <- jail %>%
+      group_by(date) %>%
+      summarise(count = n())
+
+    ggplot(table, aes(x = date, y = count)) + geom_bar()
+  })
 }
 
 # Run the application 
 shinyApp(ui = ui, server = server)
-
+    
