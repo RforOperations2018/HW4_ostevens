@@ -36,13 +36,14 @@ names(df) <- str_replace(names(df), "\\(","") %>%
              str_replace_all( " ","_") %>%
              str_replace( ",","") %>%
              str_to_lower() 
-
+# You need to save requests as a variable
 GET("https://query.data.world/s/owq2xiknasfbqxec6r6vixndfsinnn")
 
 origdata <- df
   
 
 # origdata <- read_csv("data_behind_table_2_1_whr_2017.csv")
+# The file has been removed from your repo... so now it doesn't work
 money.wide <- read_excel("Download-GDPPCconstant-USD-countries.xls", 
                          skip = 2)
 money.long <- melt(money.wide, id.vars = c("CountryID","Country"))
@@ -50,7 +51,9 @@ money.long <- melt(money.wide, id.vars = c("CountryID","Country"))
 origdata <- mutate(origdata, year = as.character(year))
 origdata <- left_join(origdata, money.long, by = c("country" = "Country", "year" = "variable"))
 origdata <- mutate(origdata, gdp = value)
-  
+
+
+# I recommend you just removing stuff like this in the future, you don't need it, and if you have to bring it back, that's why you commit things to GitHub
 # happiness.load <- origdata %>%
 #   mutate(confidence_in_gov = confidence_in_national_government, 
 #          Gini_Income = gini_of_household_income_reported_in_gallup_by_wp5_year, 
@@ -164,6 +167,7 @@ ui <- dashboardPage(header, sidebar, body)
 server <- function(input, output) {
   # Reactive input data
   hInput <- reactive({
+    # Loading your data should be down here, not up in the beginning, but since you never got it working it be difficult
     happiness <- happiness.load %>%
       # Year Filter
       filter(year == input$yearSelect)
